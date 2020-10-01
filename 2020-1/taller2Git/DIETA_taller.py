@@ -10,7 +10,7 @@ import xlwings as xw
 xl_dieta = pd.ExcelFile(xlFile)
 
 #Definir modelo de optimizacion
-
+modelo = 
 
 #Indices del modelo
 modelo.S_TIPO = Set(initialize=["ACOMPAÑANTE","CARNE","POSTRE"])
@@ -20,11 +20,11 @@ modelo.S_TIPO = Set(initialize=["ACOMPAÑANTE","CARNE","POSTRE"])
 #Definir variables de decision
 
 #Definir funcion objetivo
-def valorAlmuerzo_rule(modeloRobo):
-    expr  = sum (DATOS1.COSTO[i]*modeloDieta.x[i] for i in  DATOS1.index) 
+def valorAlmuerzo_rule(modelo):
+    expr  = sum (DATOS1.COSTO[i]*modelo.x[i] for i in  DATOS1.index) 
     return expr
 
-modeloDieta.ValorAlmuerzo = Objective(rule=valorAlmuerzo_rule, sense=minimize)
+modelo.ValorAlmuerzo = Objective(rule=valorAlmuerzo_rule, sense=minimize)
 
 #Definir restricciones
 #restriccion de Carbohidratos
@@ -41,16 +41,16 @@ modeloDieta.ValorAlmuerzo = Objective(rule=valorAlmuerzo_rule, sense=minimize)
 opt = SolverFactory('cbc')
 
 #Escribir archivo .lp
-modeloDieta.write("archivo.lp",io_options={"symbolic_solver_labels":True})
+modelo.write("archivo.lp",io_options={"symbolic_solver_labels":True})
 
 #Ejecutar el modelo
-results = opt.solve(modeloDieta,tee=0,logfile ="dieta.log", keepfiles= 0,symbolic_solver_labels=True)
+results = opt.solve(modelo,tee=0,logfile ="dieta.log", keepfiles= 0,symbolic_solver_labels=True)
 
 if (results.solver.status == SolverStatus.ok) and (results.solver.termination_condition == TerminationCondition.optimal):
 
     #Imprimir Resultados
     print ()
-    print ("Valor del almuerzo: ", value(modeloDieta.ValorAlmuerzo))
+    print ("Valor del almuerzo: ", value(modelo.ValorAlmuerzo))
     print ()
 
     #Escribir los resultados
@@ -64,7 +64,7 @@ if (results.solver.status == SolverStatus.ok) and (results.solver.termination_co
         fila += 1
         salida = []
         salida.append(i)
-        salida.append(modeloDieta.x[i].value) 
+        salida.append(modelo.x[i].value) 
         out_almuerzo.loc[fila] = salida
 
     hoja_out.range('A1').value = out_almuerzo
